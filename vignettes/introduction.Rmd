@@ -154,21 +154,8 @@ To model the contact matrix in this way with the `contact_matrix` function, set 
 contact_matrix(polymod, countries = "United Kingdom", age.limits = c(0, 1, 5, 15), split = TRUE)
 ```
 
-Plotting
-=======
-
-The contact matrices can be plotted, for example, using the `geom_tile` function of the `ggplot2` package.
-
-```{r fig.width=5, fig.height=5, tidy=TRUE}
-library('reshape2')
-library('ggplot2')
-df <- melt(mr, varnames = c("age1", "age2"), value.name = "contacts")
-ggplot(df, aes(x = age2, y = age1, fill = contacts)) + theme(legend.position="bottom") + geom_tile()
-```
-
 Participant weights
 =======
-
 
 Participant weights are commonly used to align sample and population characteristics in terms of temporal aspects and the age distribution. For example, the day of the week has been reported as a driving factor for social contact behavior, hence to obtain a weekly average, the survey data should represent the weekly 2/5 distribution of weekend/week days. To align the survey data to this distribution, one can obtain participant weights in the form of:
 $$w_{day.of.week} = \tfrac{5/7}{N_{weekday}/N} \text{  OR   } \tfrac{2/7}{N_{weekend}/N}$$
@@ -188,9 +175,7 @@ Temporal weights are activated in `contact_matirx` by `weigh.dayofweek` and age-
 ```{r message=FALSE, warning=FALSE}
 contact_matrix(survey = polymod, age.limits = c(0,18,60), weigh.dayofweek = TRUE, 
                weigh.age = TRUE, return.part.weights = TRUE)
-
 ```
-
 
 Participant weights threshold
 =======
@@ -201,5 +186,38 @@ If the survey population differs extensively from the demography, (some) partici
 contact_matrix(survey = polymod, age.limits = c(0,18,60), weigh.dayofweek = TRUE, 
                weigh.age = TRUE, return.part.weights = TRUE,
                weight.threshold = 3)
+```
+
+Filtering
+=======
+
+The `filter` argument to `contact_matrix` can be used to select particular participants or contacts. For example, in the `polymod` dataset, the indicators `cnt_home`, `cnt_work`, `cnt_school`, `cnt_transport`, `cnt_leisure` and `cnt_otherplace` take value 0 or 1 depending on where a contact occurred:
+
+```{r message=FALSE, warning=FALSE}
+head(polymod$contacts)
+```
+
+In order to derive a contact matrix for home contacts only, one would use `filter = list(cnt_home = 1)`.
+
+```{r message=FALSE, warning=FALSE}
+contact_matrix(survey = polymod, age.limits = c(0,18,60), filter = list(cnt_home = 1))
+```
+
+In order to derive a contact matrix outside home, school or work, one would use
+
+```{r message=FALSE, warning=FALSE}
+contact_matrix(survey = polymod, age.limits = c(0,18,60), filter = list(cnt_home = 0, cnt_school = 0, cnt_work = 0))
+```
+
+Plotting
+=======
+
+The contact matrices can be plotted, for example, using the `geom_tile` function of the `ggplot2` package.
+
+```{r fig.width=5, fig.height=5, tidy=TRUE}
+library('reshape2')
+library('ggplot2')
+df <- melt(mr, varnames = c("age1", "age2"), value.name = "contacts")
+ggplot(df, aes(x = age2, y = age1, fill = contacts)) + theme(legend.position="bottom") + geom_tile()
 ```
 
